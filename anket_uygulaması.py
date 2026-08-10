@@ -80,7 +80,7 @@ def normalize_text(text):
     if not text:
         return ""
     # Türkçe karakterleri İngilizce karşılıklarına çevirerek harf/büyük-küçük uyumsuzluğunu yok eder
-    tr_map = str.maketrans("IİıiĞğÜüŞşÖöÇç", "iiiiigguussoocc")
+    tr_map = str.maketrans("IİıiĞğÜüŞşÖöÇç", "iiiigguussoocc")
     text = text.translate(tr_map)
     # Hepsini küçük harfe çevir ve aradaki boşlukları tamamen birleştir (Kusursuz eşleşme için)
     return "".join(text.lower().split())
