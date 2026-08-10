@@ -496,6 +496,9 @@ elif st.session_state.screen == "blocked":
 # ─────────────────────────────────────────────────────────────────
 # SURVEY EKRANI
 # ─────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────
+# SURVEY EKRANI
+# ─────────────────────────────────────────────────────────────────
 elif st.session_state.screen == "survey":
     remaining_total = len(st.session_state.images)
 
@@ -528,36 +531,52 @@ elif st.session_state.screen == "survey":
 
     btn_label = "Cevapla ve Anketi Bitir" if is_last else "Cevapla ve Sonraki Soru →"
 
-    if st.button(btn_label, use_container_width=True, disabled=(choice is None)):
-        is_correct = (choice == item["class"])
-        d = st.session_state.demographics
-        row = [
-            st.session_state.participant_id,
-            st.session_state.email_hash,
-            d["year"],
-            d["university"],
-            question_number,
-            key,
-            item["class"],
-            choice,
-            choice == item["class"],
-            confidence,
-            datetime.now().isoformat(),
-        ]
+    # YENİ 1: Eğer işlem sürüyorsa veya boş bırakıldıysa butonu otomatik kilitle (Grileştir)
+    btn_disabled = (choice is None) or st.session_state.get("is_processing", False)
 
-        # Eğer kayıt başarılıysa (True dönerse) sonraki soruya geç
-        if append_response(row):
-            if is_correct:
-                st.session_state.correct_count += 1
-            if is_last:
-                upsert_lock(
-                    st.session_state.email_hash, st.session_state.participant_id, True,
-                    d["year"], d["university"], st.session_state.image_order_json,
-                )
-                st.session_state.screen = "finished"
+    if st.button(btn_label, use_container_width=True, disabled=btn_disabled):
+        # Butona basılır basılmaz sistemi kilitle ve ekranı 1 saliseliğine yenileyip butonu gri yap
+        st.session_state.is_processing = True
+        st.rerun()
+
+    # YENİ 2: Buton kilitlendiğinde devreye giren kayıt mekanizması
+    if st.session_state.get("is_processing", False):
+        with st.spinner("Cevap kaydediliyor, lütfen bekleyin..."):
+            is_correct = (choice == item["class"])
+            d = st.session_state.demographics
+            row = [
+                st.session_state.participant_id,
+                st.session_state.email_hash,
+                d["year"],
+                d["university"],
+                question_number,
+                key,
+                item["class"],
+                choice,
+                is_correct,
+                confidence,
+                datetime.now().isoformat(),
+            ]
+
+            # Kayıt başarılı olursa kilitleri aç ve diğer soruya geç
+            if append_response(row):
+                if is_correct:
+                    st.session_state.correct_count += 1
+                if is_last:
+                    upsert_lock(
+                        st.session_state.email_hash, st.session_state.participant_id, True,
+                        d["year"], d["university"], st.session_state.image_order_json,
+                    )
+                    st.session_state.screen = "finished"
+                else:
+                    st.session_state.idx += 1
+                
+                st.session_state.is_processing = False
+                st.rerun()
             else:
-                st.session_state.idx += 1
-            st.rerun()
+                # Eğer internet kopması vb. bir hata olursa kilidi aç (Tekrar deneyebilsinler)
+                st.session_state.is_processing = False
+                st.rerun()
 
 # ─────────────────────────────────────────────────────────────────
 # FINISHED EKRANI
