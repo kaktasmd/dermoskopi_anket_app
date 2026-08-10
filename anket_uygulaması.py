@@ -419,6 +419,7 @@ elif st.session_state.screen == "demographics":
                     stored_year = status.get("year", "")
                     stored_university = status.get("university", "")
 
+                    # YENİ KONTROL: Hem yılı hem de seçilen üniversiteyi kesin olarak kıyaslar
                     if (stored_year and str(stored_year) != str(year)) or (stored_university and stored_university != university):
                         st.error(
                             f"⚠️ **BİLGİ UYUŞMAZLIĞI:** Bu e-posta adresi ile daha önce "
@@ -428,6 +429,7 @@ elif st.session_state.screen == "demographics":
                     else:
                         manifest = load_manifest()
                         by_key = {build_key(it): it for it in manifest}
+                        
                     else:
                         manifest = load_manifest()
                         by_key = {build_key(it): it for it in manifest}
