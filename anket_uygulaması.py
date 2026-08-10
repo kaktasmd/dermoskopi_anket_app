@@ -412,8 +412,20 @@ elif st.session_state.screen == "demographics":
                     pass  # İnternet/Sunucu hatası
 
                 elif status.get("completed"):
-                    st.session_state.screen = "blocked"
-                    st.rerun()
+                    stored_year = status.get("year", "")
+                    stored_university = status.get("university", "")
+
+                    # Anket bitmiş olsa bile doğru bilgileri girmesini zorunlu kılıyoruz
+                    if (stored_year and str(stored_year) != str(year)) or (stored_university and stored_university != university):
+                        st.error(
+                            f"⚠️ **BİLGİ UYUŞMAZLIĞI:** Bu e-posta adresi ile daha önce "
+                            f"**{stored_year}** kıdemi ve **{stored_university}** kurumu ile kayıt oluşturulmuş. "
+                            "Lütfen bilgilerinizi ilk girişinizdeki gibi seçerek tekrar 'Devam Et'e basın."
+                        )
+                    else:
+                        st.session_state.correct_count = status.get("correct_count", 0)
+                        st.session_state.screen = "blocked"
+                        st.rerun()
 
                 elif status.get("resume"):
                     stored_year = status.get("year", "")
