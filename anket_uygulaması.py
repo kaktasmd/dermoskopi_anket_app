@@ -17,6 +17,184 @@ import streamlit as st
 import requests, random, hashlib, json, re
 from datetime import datetime
 
+
+KURUM_LISTESI = [
+    "Lütfen Seçiniz...",
+    "Acıbadem Üniversitesi Tıp Fakültesi",
+    "Adana Çukurova Devlet Hastanesi",
+    "Adana Şehir Hastanesi",
+    "Adana Yüreğir Devlet Hastanesi",
+    "Adıyaman Eğitim ve Araştırma Hastanesi",
+    "Adıyaman Üniversitesi Tıp Fakültesi",
+    "Adnan Menderes Üniversitesi Tıp Fakültesi",
+    "Afyonkarahisar Sağlık Bilimleri Üniversitesi Tıp Fakültesi",
+    "Ahi Evran Üniversitesi Tıp Fakültesi",
+    "Akdeniz Üniversitesi Tıp Fakültesi",
+    "Aksaray Üniversitesi Tıp Fakültesi",
+    "Alanya Alaaddin Keykubat Üniversitesi Tıp Fakültesi",
+    "Altınbaş Üniversitesi Tıp Fakültesi",
+    "Amasya Üniversitesi Tıp Fakültesi",
+    "Ankara Atatürk Sanatoryum Eğitim ve Araştırma Hastanesi",
+    "Ankara Bilkent Şehir Hastanesi",
+    "Ankara Dışkapı Yıldırım Beyazıt Eğitim ve Araştırma Hastanesi",
+    "Ankara Dr. Abdurrahman Yurtaslan Onkoloji Eğitim ve Araştırma Hastanesi",
+    "Ankara Dr. Sami Ulus Kadın Doğum Çocuk Sağlığı ve Hastalıkları Eğitim ve Araştırma Hastanesi",
+    "Ankara Dr. Zekai Tahir Burak Kadın Sağlığı Eğitim ve Araştırma Hastanesi",
+    "Ankara Eğitim ve Araştırma Hastanesi",
+    "Ankara Etlik Şehir Hastanesi",
+    "Ankara Ulucanlar Göz Eğitim ve Araştırma Hastanesi",
+    "Ankara Üniversitesi Tıp Fakültesi",
+    "Ankara Yıldırım Beyazıt Üniversitesi Tıp Fakültesi",
+    "Antalya Eğitim ve Araştırma Hastanesi",
+    "Atatürk Üniversitesi Tıp Fakültesi",
+    "Bahçeşehir Üniversitesi Tıp Fakültesi",
+    "Balıkesir Atatürk Şehir Hastanesi",
+    "Balıkesir Üniversitesi Tıp Fakültesi",
+    "Başakşehir Çam ve Sakura Şehir Hastanesi",
+    "Başkent Üniversitesi Tıp Fakültesi",
+    "Batman Eğitim ve Araştırma Hastanesi",
+    "Batman Üniversitesi Tıp Fakültesi",
+    "Beykent Üniversitesi Tıp Fakültesi",
+    "Bezmialem Vakıf Üniversitesi Tıp Fakültesi",
+    "Bolu Abant İzzet Baysal Üniversitesi Tıp Fakültesi",
+    "Bozok Üniversitesi Tıp Fakültesi",
+    "Bursa Şehir Hastanesi",
+    "Bursa Uludağ Üniversitesi Tıp Fakültesi",
+    "Bursa Yüksek İhtisas Eğitim ve Araştırma Hastanesi",
+    "Celal Bayar Üniversitesi Tıp Fakültesi",
+    "Cumhuriyet Üniversitesi Tıp Fakültesi",
+    "Çanakkale Onsekiz Mart Üniversitesi Tıp Fakültesi",
+    "Çorum Hitit Üniversitesi Erol Olçok Eğitim ve Araştırma Hastanesi",
+    "Çukurova Üniversitesi Tıp Fakültesi",
+    "Dicle Üniversitesi Tıp Fakültesi",
+    "Diyarbakır Gazi Yaşargil Eğitim ve Araştırma Hastanesi",
+    "Dokuz Eylül Üniversitesi Tıp Fakültesi",
+    "Düzce Üniversitesi Tıp Fakültesi",
+    "Ege Üniversitesi Tıp Fakültesi",
+    "Elazığ Fethi Sekin Şehir Hastanesi",
+    "Erciyes Üniversitesi Tıp Fakültesi",
+    "Erzincan Binali Yıldırım Üniversitesi Tıp Fakültesi",
+    "Erzurum Bölge Eğitim ve Araştırma Hastanesi",
+    "Erzurum Şehir Hastanesi",
+    "Eskişehir Osmangazi Üniversitesi Tıp Fakültesi",
+    "Eskişehir Şehir Hastanesi",
+    "Fırat Üniversitesi Tıp Fakültesi",
+    "Gazi Üniversitesi Tıp Fakültesi",
+    "Gaziantep Şehir Hastanesi",
+    "Gaziantep Üniversitesi Tıp Fakültesi",
+    "Giresun Üniversitesi Tıp Fakültesi",
+    "Gülhane Eğitim ve Araştırma Hastanesi",
+    "Hacettepe Üniversitesi Tıp Fakültesi",
+    "Harran Üniversitesi Tıp Fakültesi",
+    "Hatay Eğitim ve Araştırma Hastanesi",
+    "Hitit Üniversitesi Tıp Fakültesi",
+    "Isparta Şehir Hastanesi",
+    "İnönü Üniversitesi Tıp Fakültesi",
+    "İstanbul Bağcılar Eğitim ve Araştırma Hastanesi",
+    "İstanbul Bakırköy Dr. Sadi Konuk Eğitim ve Araştırma Hastanesi",
+    "İstanbul Beyoğlu Göz Eğitim ve Araştırma Hastanesi",
+    "İstanbul Dr. Siyami Ersek Göğüs Kalp ve Damar Cerrahisi Eğitim ve Araştırma Hastanesi",
+    "İstanbul Eğitim ve Araştırma Hastanesi",
+    "İstanbul Erenköy Ruh ve Sinir Hastalıkları Eğitim ve Araştırma Hastanesi",
+    "İstanbul Fatih Sultan Mehmet Eğitim ve Araştırma Hastanesi",
+    "İstanbul Gaziosmanpaşa Eğitim ve Araştırma Hastanesi",
+    "İstanbul Göztepe Prof. Dr. Süleyman Yalçın Şehir Hastanesi",
+    "İstanbul Haseki Eğitim ve Araştırma Hastanesi",
+    "İstanbul Haydarpaşa Numune Eğitim ve Araştırma Hastanesi",
+    "İstanbul Kanuni Sultan Süleyman Eğitim ve Araştırma Hastanesi",
+    "İstanbul Kartal Dr. Lütfi Kırdar Şehir Hastanesi",
+    "İstanbul Kartal Koşuyolu Yüksek İhtisas Eğitim ve Araştırma Hastanesi",
+    "İstanbul Medeniyet Üniversitesi Tıp Fakültesi",
+    "İstanbul Medipol Üniversitesi Tıp Fakültesi",
+    "İstanbul Okmeydanı Prof. Dr. Cemil Taşcıoğlu Şehir Hastanesi",
+    "İstanbul Pendik Eğitim ve Araştırma Hastanesi",
+    "İstanbul Prof. Dr. İlhan Varank Sancaktepe Eğitim ve Araştırma Hastanesi",
+    "İstanbul Sarıyer Hamidiye Etfal Eğitim ve Araştırma Hastanesi",
+    "İstanbul Süreyyapaşa Göğüs Hastalıkları ve Göğüs Cerrahisi Eğitim ve Araştırma Hastanesi",
+    "İstanbul Şişli Hamidiye Etfal Eğitim ve Araştırma Hastanesi",
+    "İstanbul Taksim Eğitim ve Araştırma Hastanesi",
+    "İstanbul Üniversitesi Cerrahpaşa Tıp Fakültesi",
+    "İstanbul Üniversitesi İstanbul Tıp Fakültesi",
+    "İstanbul Ümraniye Eğitim ve Araştırma Hastanesi",
+    "İstanbul Yedikule Göğüs Hastalıkları ve Göğüs Cerrahisi Eğitim ve Araştırma Hastanesi",
+    "İstanbul Zeynep Kamil Kadın ve Çocuk Hastalıkları Eğitim ve Araştırma Hastanesi",
+    "İstinye Üniversitesi Tıp Fakültesi",
+    "İzmir Bakırçay Üniversitesi Tıp Fakültesi",
+    "İzmir Bayraklı Şehir Hastanesi",
+    "İzmir Bozyaka Eğitim ve Araştırma Hastanesi",
+    "İzmir Çiğli Eğitim ve Araştırma Hastanesi",
+    "İzmir Demokrasi Üniversitesi Tıp Fakültesi",
+    "İzmir Dr. Suat Seren Göğüs Hastalıkları ve Cerrahisi Eğitim ve Araştırma Hastanesi",
+    "İzmir Katip Çelebi Üniversitesi Tıp Fakültesi",
+    "İzmir Tepecik Eğitim ve Araştırma Hastanesi",
+    "Kafkas Üniversitesi Tıp Fakültesi",
+    "Kahramanmaraş Necip Fazıl Şehir Hastanesi",
+    "Kahramanmaraş Sütçü İmam Üniversitesi Tıp Fakültesi",
+    "Karabük Eğitim ve Araştırma Hastanesi",
+    "Karabük Üniversitesi Tıp Fakültesi",
+    "Karadeniz Teknik Üniversitesi Tıp Fakültesi",
+    "Kastamonu Eğitim ve Araştırma Hastanesi",
+    "Kastamonu Üniversitesi Tıp Fakültesi",
+    "Kayseri Şehir Hastanesi",
+    "Kırıkkale Üniversitesi Tıp Fakültesi",
+    "Kırklareli Üniversitesi Tıp Fakültesi",
+    "Kocaeli Derince Eğitim ve Araştırma Hastanesi",
+    "Kocaeli Şehir Hastanesi",
+    "Kocaeli Üniversitesi Tıp Fakültesi",
+    "Koç Üniversitesi Tıp Fakültesi",
+    "Konya Eğitim ve Araştırma Hastanesi",
+    "Konya Numune Hastanesi",
+    "Konya Şehir Hastanesi",
+    "KTO Karatay Üniversitesi Tıp Fakültesi",
+    "Kütahya Sağlık Bilimleri Üniversitesi Tıp Fakültesi",
+    "Kütahya Şehir Hastanesi",
+    "Lokman Hekim Üniversitesi Tıp Fakültesi",
+    "Maltepe Üniversitesi Tıp Fakültesi",
+    "Manisa Şehir Hastanesi",
+    "Marmara Üniversitesi Tıp Fakültesi",
+    "Mersin Şehir Hastanesi",
+    "Mersin Üniversitesi Tıp Fakültesi",
+    "Muğla Eğitim ve Araştırma Hastanesi",
+    "Muğla Sıtkı Koçman Üniversitesi Tıp Fakültesi",
+    "Mustafa Kemal Üniversitesi Tıp Fakültesi",
+    "Namık Kemal Üniversitesi Tıp Fakültesi",
+    "Necmettin Erbakan Üniversitesi Meram Tıp Fakültesi",
+    "Niğde Eğitim ve Araştırma Hastanesi",
+    "Niğde Ömer Halisdemir Üniversitesi Tıp Fakültesi",
+    "Ondokuz Mayıs Üniversitesi Tıp Fakültesi",
+    "Ordu Eğitim ve Araştırma Hastanesi",
+    "Ordu Üniversitesi Tıp Fakültesi",
+    "Pamukkale Üniversitesi Tıp Fakültesi",
+    "Recep Tayyip Erdoğan Üniversitesi Tıp Fakültesi",
+    "Sakarya Eğitim ve Araştırma Hastanesi",
+    "Sakarya Üniversitesi Tıp Fakültesi",
+    "Sağlık Bilimleri Üniversitesi Tıp Fakültesi",
+    "Samsun Eğitim ve Araştırma Hastanesi",
+    "Samsun Şehir Hastanesi",
+    "Selçuk Üniversitesi Tıp Fakültesi",
+    "Sivas Numune Hastanesi",
+    "Süleyman Demirel Üniversitesi Tıp Fakültesi",
+    "Şanlıurfa Mehmet Akif İnan Eğitim ve Araştırma Hastanesi",
+    "Şanlıurfa Şehir Hastanesi",
+    "Tekirdağ Şehir Hastanesi",
+    "TOBB Ekonomi ve Teknoloji Üniversitesi Tıp Fakültesi",
+    "Tokat Gaziosmanpaşa Üniversitesi Tıp Fakültesi",
+    "Trabzon Kanuni Eğitim ve Araştırma Hastanesi",
+    "Trakya Üniversitesi Tıp Fakültesi",
+    "Ufuk Üniversitesi Tıp Fakültesi",
+    "Uşak Eğitim ve Araştırma Hastanesi",
+    "Uşak Üniversitesi Tıp Fakültesi",
+    "Van Bölge Eğitim ve Araştırma Hastanesi",
+    "Van Yüzüncü Yıl Üniversitesi Tıp Fakültesi",
+    "Yeditepe Üniversitesi Tıp Fakültesi",
+    "Yozgat Şehir Hastanesi",
+    "Zonguldak Atatürk Devlet Hastanesi",
+    "Zonguldak Bülent Ecevit Üniversitesi Tıp Fakültesi",
+    "Diğer (Listede yok, kendim yazmak istiyorum)"
+]
+
+
+
 # ─────────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────────
@@ -197,29 +375,41 @@ if st.session_state.screen == "welcome":
 elif st.session_state.screen == "demographics":
     st.header("Önce birkaç bilgi")
     year = st.selectbox("Asistanlıkta kaçıncı yılındasınız?", [""] + YEAR_OPTIONS)
-    university = st.text_input(
-        "Hangi üniversitede/hastanede tıp eğitimi aldınız / ihtisas yapıyorsunuz ? ",
-        placeholder="Örn. Süleyman Demirel Üniversitesi ya da XY Eğitim Araştırma Hastanesi",
+    
+    # 1. YENİLİK: TEXT INPUT YERİNE AÇILIR MENÜ (SELECTBOX)
+    secilen_kurum = st.selectbox(
+        "Hangi üniversitede/hastanede ihtisas yapıyorsunuz?",
+        options=KURUM_LISTESI
     )
+    
+    # Eğer "Diğer" seçilirse, manuel yazması için bir kutu göster
+    if secilen_kurum == "Diğer (Listede yok, kendim yazmak istiyorum)":
+        university = st.text_input("Lütfen kurumunuzun adını tam olarak yazınız:")
+    else:
+        university = secilen_kurum
+
     email = st.text_input("E-posta adresiniz")
 
     if st.button("Devam Et →", use_container_width=True):
-        if not (year and university.strip() and email.strip()):
-            st.error("Lütfen tüm alanları doldurun.")
+        
+        # 2. YENİLİK: HATA KONTROLLERİ ÇOK DAHA BASİT HALE GELDİ
+        if not year:
+            st.error("Lütfen asistanlık yılınızı seçin.")
+        elif secilen_kurum == "Lütfen Seçiniz...":
+            st.error("Lütfen listeden kurumunuzu seçin.")
+        elif secilen_kurum == "Diğer (Listede yok, kendim yazmak istiyorum)" and len(university.strip()) < 5:
+            st.error("Lütfen kurum adını eksiksiz yazınız.")
+        elif not email.strip():
+            st.error("Lütfen e-posta adresinizi yazın.")
         elif not is_valid_email(email):
             st.error("Lütfen geçerli ve eksiksiz bir e-posta adresi girin (Örn: ornek@gmail.com veya kurum@saglik.gov.tr).")
-        elif not is_valid_institution(university):
-            st.error(
-                "Lütfen kurum adını hepsini küçük harfle ve daha belirgin yazın. Sadece 'üniversite' veya 'hastane' "
-                "yazarak geçemezsiniz (Örn: Süleyman Demirel Üniversitesi veya XY Hastanesi)."
-            )
         else:
             with st.spinner("Katılımcı durumu kontrol ediliyor…"):
                 ehash = email_hash(email)
                 status = get_email_status(ehash)
 
                 if status is None:
-                    pass  # İnternet/Sunucu hatası - ekranda kalsın, hata mesajı yukarıda gösterilecek.
+                    pass  # İnternet/Sunucu hatası
 
                 elif status.get("completed"):
                     st.session_state.screen = "blocked"
@@ -229,10 +419,11 @@ elif st.session_state.screen == "demographics":
                     stored_year = status.get("year", "")
                     stored_university = status.get("university", "")
 
-                    if (stored_year and str(stored_year) != str(year)) or (stored_university and normalize_text(str(stored_university)) != normalize_text(university)):
+                    # Eğer listeden seçmişse hata payı zaten sıfırdır, rahatça kıyaslayabiliriz.
+                    if (stored_year and str(stored_year) != str(year)):
                         st.error(
                             f"⚠️ **BİLGİ UYUŞMAZLIĞI:** Bu e-posta adresi ile daha önce "
-                            f"**{stored_year}** kıdemi ve **{stored_university}** kurumu ile kayıt oluşturulmuş. "
+                            f"**{stored_year}** kıdemi ile kayıt oluşturulmuş. "
                             "Lütfen bilgilerinizi ilk girişinizdeki gibi düzeltip tekrar 'Devam Et'e basın."
                         )
                     else:
@@ -266,7 +457,6 @@ elif st.session_state.screen == "demographics":
                     order_json = json.dumps([build_key(it) for it in images])
                     participant_id = ehash[:10] + "-" + datetime.now().strftime("%H%M%S")
 
-                    # Sadece Google kaydı başarılı olursa ankete başlat:
                     if upsert_lock(ehash, participant_id, False, year, university.strip(), order_json):
                         st.session_state.images = images
                         st.session_state.total_questions = len(manifest)
