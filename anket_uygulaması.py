@@ -426,10 +426,7 @@ elif st.session_state.screen == "demographics":
                             f"**{stored_year}** kıdemi ve **{stored_university}** kurumu ile kayıt oluşturulmuş. "
                             "Lütfen bilgilerinizi ilk girişinizdeki gibi seçerek tekrar 'Devam Et'e basın."
                         )
-                    else:
-                        manifest = load_manifest()
-                        by_key = {build_key(it): it for it in manifest}
-                        
+                
                     else:
                         manifest = load_manifest()
                         by_key = {build_key(it): it for it in manifest}
