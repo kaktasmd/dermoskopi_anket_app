@@ -48,9 +48,15 @@ def email_hash(email):
 
 def is_valid_institution(text):
     t = text.strip().lower()
-    if len(t) < 3:
+    kelimeler = t.split()
+    
+    # Kural 1: Sadece tek kelime yazılamaz (Örn: "Üniversite" veya "Hastane" engellenir)
+    if len(kelimeler) < 2:
         return False
-    return any(kw in t for kw in INSTITUTION_KEYWORDS)
+        
+    # Kişi "Süleyman Demirel", "Tokat Üniversitesi" veya "XY Hastanesi" gibi 
+    # en az 2 kelimelik mantıklı bir isim girdiyse kabul edilir.
+    return True
 
 def is_valid_email(email):
     email = email.strip().lower()
@@ -204,8 +210,8 @@ elif st.session_state.screen == "demographics":
             st.error("Lütfen geçerli ve eksiksiz bir e-posta adresi girin (Örn: ornek@gmail.com veya kurum@saglik.gov.tr).")
         elif not is_valid_institution(university):
             st.error(
-                "Kurum adı geçerli görünmüyor. Lütfen adında 'Üniversite' ya da 'Hastane' "
-                "ifadesi geçen tam kurum adını yazın."
+                "Lütfen kurum adını hepsini küçük harfle ve daha belirgin yazın. Sadece 'üniversite' veya 'hastane' "
+                "yazarak geçemezsiniz (Örn: Süleyman Demirel Üniversitesi veya XY Hastanesi)."
             )
         else:
             with st.spinner("Katılımcı durumu kontrol ediliyor…"):
