@@ -419,13 +419,15 @@ elif st.session_state.screen == "demographics":
                     stored_year = status.get("year", "")
                     stored_university = status.get("university", "")
 
-                    # Eğer listeden seçmişse hata payı zaten sıfırdır, rahatça kıyaslayabiliriz.
-                    if (stored_year and str(stored_year) != str(year)):
+                    if (stored_year and str(stored_year) != str(year)) or (stored_university and stored_university != university):
                         st.error(
                             f"⚠️ **BİLGİ UYUŞMAZLIĞI:** Bu e-posta adresi ile daha önce "
-                            f"**{stored_year}** kıdemi ile kayıt oluşturulmuş. "
-                            "Lütfen bilgilerinizi ilk girişinizdeki gibi düzeltip tekrar 'Devam Et'e basın."
+                            f"**{stored_year}** kıdemi ve **{stored_university}** kurumu ile kayıt oluşturulmuş. "
+                            "Lütfen bilgilerinizi ilk girişinizdeki gibi seçerek tekrar 'Devam Et'e basın."
                         )
+                    else:
+                        manifest = load_manifest()
+                        by_key = {build_key(it): it for it in manifest}
                     else:
                         manifest = load_manifest()
                         by_key = {build_key(it): it for it in manifest}
