@@ -8,9 +8,9 @@ Original file is located at
 """
 
 """
-=====================================================================
-CİLT LEZYONU DEĞERLENDİRME ANKETİ
-=====================================================================
+
+CİLT LEZYONLARININ DERMOSKOPİK GÖRÜNTÜSÜNÜN DEĞERLENDİRİLMESİ ANKETİ
+
 """
 
 import streamlit as st
