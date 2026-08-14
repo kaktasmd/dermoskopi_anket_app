@@ -204,7 +204,7 @@ MANIFEST_URL = GITHUB_BASE + "manifest.json"
 # YENİ ALDIĞINIZ WEB APP URL'SİNİ BURAYA YAPIŞTIRIN:
 APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypn-0lMNxwgQT_0UTZ-EmIWMCgJvpR_Te0RsEPS7Y2chnJe_8VBPDCqYNYD3Bm1887dQ/exec"
 
-AI_ACCURACY = 83.0
+AI_ACCURACY = 83.3
 
 AI_CLASS_SCORES = {
     "NEVUS": 86.7,
@@ -293,6 +293,8 @@ if "idx" not in st.session_state:
     st.session_state.idx = 0
 if "correct_count" not in st.session_state:
     st.session_state.correct_count = 0
+if "class_scores" not in st.session_state:
+    st.session_state.class_scores = {k: {"correct": 0, "total": 0} for k in CLASS_LABELS.keys()}
 
 st.set_page_config(page_title=STUDY_TITLE, page_icon="🩺", layout="centered")
 
@@ -327,9 +329,9 @@ if st.session_state.screen == "welcome":
     st.markdown("#### Süre ve gizlilik")
     st.markdown(
         "- Ortalama süre **20–25 dakika**.\n"
-        "- Cevaplarınız **anonim** olarak analiz edilecektir; ankete girişte herahangi bir kişisel bilgi(e-mail,telefon numarası, ad,soyad) istenmeyecektir.\n"
+        "- Cevaplarınız **anonim** olarak analiz edilecektir; ankete girişte herhangi bir kişisel bilgi(e-mail,telefon numarası, ad,soyad) istenmeyecektir.\n"
         "- Ankete yeni başlayacaksanız ankete başla seçeneğini işaretleyiniz. Bu seçenekten sonra karşınıza bir **4 haneli bir kod ** gelecektir.\n"
-        " - İnternet bağlantısının kopması ya da anketi yarıda bırakma durumunda diğer girişlerde ankete devam et butonuna tıklayıp size tanımlanan özel kodu sisteme girdiğinizde ankete kaldığınız yerden devam edebilirsiniz."
+        " - İnternet bağlantısının kopması ya da anketi yarıda bırakma durumunda diğer girişlerde ankete devam et butonuna tıklayıp size tanımlanan özel kodu sisteme girdiğinizde ankete kaldığınız yerden devam edebilirsiniz.\n"
         " - **Anketin sonunda her hastalık sınıfı için kendi performansınızı ve modelin performansını görebileceksiniz.** " 
     )
 
@@ -364,8 +366,11 @@ elif st.session_state.screen == "resume_login":
                     status = check_participant_code(entered_code)
                     
                     if status and status.get("found"):
+                        default_scores = {k: {"correct": 0, "total": 0} for k in CLASS_LABELS.keys()}
+                        
                         if status.get("completed"):
                             st.session_state.correct_count = status.get("correct_count", 0)
+                            st.session_state.class_scores = status.get("class_scores", default_scores)
                             st.session_state.participant_code = entered_code
                             st.session_state.screen = "finished"
                             st.rerun()
@@ -384,6 +389,7 @@ elif st.session_state.screen == "resume_login":
                             st.session_state.demographics = {"year": status.get("year"), "university": status.get("university")}
                             st.session_state.idx = 0
                             st.session_state.correct_count = status.get("correct_count", 0)
+                            st.session_state.class_scores = status.get("class_scores", default_scores)
                             st.session_state.screen = "survey"
                             st.rerun()
                     elif status and not status.get("found"):
@@ -509,6 +515,8 @@ elif st.session_state.screen == "survey":
             if append_response(row):
                 if is_correct:
                     st.session_state.correct_count += 1
+                    st.session_state.class_scores[item["class"]]["correct"] += 1
+                st.session_state.class_scores[item["class"]]["total"] += 1
                 if is_last:
                     update_participant_status(st.session_state.participant_code, True)
                     st.session_state.screen = "finished"
