@@ -209,7 +209,7 @@ AI_CLASS_SCORES = {
     "DISPLASTIK_NEVUS": 70.0
 }
 
-STUDY_TITLE = "Cilt Lezyonlarının Dermoskopik Görüntülerinin Değerlendirilmesi Anketi"
+STUDY_TITLE = "Cilt Lezyonlarının Dermoskopik Görüntülerinin Değerlendirilmesi"
 YEAR_OPTIONS = ["<2 yıl", "2-4 yıl", "4 yıl ve üzeri"]
 CLASS_LABELS = {
     "NEVUS": "Nevüs",
@@ -300,9 +300,9 @@ if st.session_state.screen == "welcome":
     st.title(STUDY_TITLE)
 
     st.markdown(
-        "Bu anket, **ConvNeXtLarge ve EfficientNetV2M ensemble modelimizin** cilt lezyonlarının dermoskopik görüntülerinin "
-        "sınıflandırması sonucunda elde ettiği tanı performansını, **dermatoloji hekimlerinin** "
-        "tanı performansı ile karşılaştırmayı amaçlayan tez çalışmasının parçasıdır."
+        "Bu çalışmada , **ConvNeXtLarge ve EfficientNetV2M ensemble modelimizin** cilt lezyonlarının dermoskopik görüntülerinin "
+        "sınıflandırması sonucunda elde ettiği tanı performansının, **dermatoloji hekimlerinin** "
+        "tanı performansı ile karşılaştırılması amaçlanmaktadır."
     )
 
     st.markdown("#### Nasıl işleyecek?")
