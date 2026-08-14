@@ -305,8 +305,8 @@ if st.session_state.screen == "welcome":
     st.title(STUDY_TITLE)
 
     st.markdown(
-        "Bu anket, **ConvNeXtLarge ve EfficientNetV2M ensemble modelimizin** cilt lezyonu "
-        "sınıflandırmasındaki tanı performansını, **dermatoloji hekimlerinin** "
+        "Bu anket, **ConvNeXtLarge ve EfficientNetV2M ensemble modelimizin** cilt lezyonlarının dermoskopik görüntülerinin "
+        "sınıflandırması sonucunda elde ettiği tanı performansını, **dermatoloji hekimlerinin** "
         "tanı performansı ile karşılaştırmayı amaçlayan tez çalışmasının parçasıdır."
     )
 
@@ -333,6 +333,7 @@ if st.session_state.screen == "welcome":
         "- Ankete yeni başlayacaksanız ankete başla seçeneğini işaretleyiniz. Bu seçenekten sonra karşınıza bir **4 haneli bir kod** gelecektir.\n"
         " - İnternet bağlantısının kopması ya da anketi yarıda bırakma durumunda diğer girişlerde ankete devam et butonuna tıklayıp size tanımlanan özel kodu sisteme girdiğinizde ankete kaldığınız yerden devam edebilirsiniz.\n"
         " - **Anketin sonunda her hastalık sınıfı için kendi performansınızı ve modelin performansını görebileceksiniz** " 
+        " **- Görüntüler ISIC archive ve SDÜ Dermatoloji bölümünde kullanılan FotoFinder cihazından elde edilmiştir. Fotoğraflar arasında kontrast, parlaklık, çözünürlük açısından farklılıklar olabilir.**"
     )
 
     st.markdown("Katılımınız tamamen gönüllülük esasına dayanmaktadır. Desteğiniz için teşekkür ederiz.")
