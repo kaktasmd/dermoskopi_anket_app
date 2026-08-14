@@ -314,7 +314,7 @@ if st.session_state.screen == "welcome":
     st.markdown(
         "- Her katılımcıya rastgele sırayla **150 dermatoskopik görüntü** gösterilecek.\n"
         "- Her görüntü için, aşağıdaki **5 tanı sınıfından birini** seçeceksiniz.\n"
-        "- Ardından bu tanıya **ne kadar emin olduğunuzu 1–10 arası** puanlayacaksınız (1: Tamamen Tahmin,  5: Orta Derece Eminim,  10: Kesinlikle Eminim). "
+        "- Ardından bu tanıya ne kadar emin olduğunuzu 1–10 arası** puanlayacaksınız **(1: Tamamen Tahmin | 3: Az Eminim | 5: Orta Derece Eminim | 7: Oldukça Eminim | 10: Kesinlikle Eminim)**."
     )
 
     with st.expander("Değerlendirilecek 5 tanı sınıfı"):
@@ -486,7 +486,7 @@ elif st.session_state.screen == "survey":
     st.image(url, use_container_width=True)
 
     choice = st.radio("Bu lezyon için tanınız nedir?", list(CLASS_LABELS.keys()), format_func=lambda k: CLASS_LABELS[k], index=None, key=f"choice_{idx}")
-    confidence = st.slider("Bu tanıdan ne kadar eminsiniz? (1: Tamamen Tahmin, 5: Orta Derece Eminim, 10: Kesinlikle Eminim)", min_value=1, max_value= 10, value=5, key=f"conf_{idx}")
+    confidence = st.slider("Bu tanıdan ne kadar eminsiniz? (1: Tamamen Tahmin | 3: Az Eminim | 5: Orta Derece Eminim | 7: Oldukça Eminim | 10: Kesinlikle Eminim)", min_value=1, max_value= 10, value=5, key=f"conf_{idx}")
 
     btn_label = "Cevapla ve Anketi Bitir" if is_last else "Cevapla ve Sonraki Soru →"
     btn_disabled = (choice is None) or st.session_state.get("is_processing", False)
