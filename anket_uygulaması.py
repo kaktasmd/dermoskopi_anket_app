@@ -221,53 +221,6 @@ INSTITUTION_KEYWORDS = ["üniversite", "universite", "hastane", "hastanesi", "ha
 # ─────────────────────────────────────────────────────────────────
 # YARDIMCI FONKSİYONLAR
 # ─────────────────────────────────────────────────────────────────
-def email_hash(email):
-    return hashlib.sha256(email.strip().lower().encode()).hexdigest()
-
-def is_valid_institution(text):
-    t = text.strip().lower()
-    kelimeler = t.split()
-    
-    # Kural 1: Sadece tek kelime yazılamaz (Örn: "Üniversite" veya "Hastane" engellenir)
-    if len(kelimeler) < 2:
-        return False
-        
-    # Kişi "Süleyman Demirel", "Tokat Üniversitesi" veya "XY Hastanesi" gibi 
-    # en az 2 kelimelik mantıklı bir isim girdiyse kabul edilir.
-    return True
-
-def is_valid_email(email):
-    email = email.strip().lower()
-
-    # 1. Temel e-posta yapısı (içinde @ ve nokta olmalı)
-    if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", email):
-        return False
-
-    domain = email.split("@")[-1]
-
-    # 2. Sık yapılan spesifik domain hataları
-    yanlis_domainler = [
-        "gmail.co", "hotmail.co", "yahoo.co", "outlook.co",
-        "gmai.com", "gmal.com", "gmail.con", "hotmail.con"
-    ]
-    if domain in yanlis_domainler:
-        return False
-
-    # 3. Son uzantı eksiklikleri (.com yerine .co veya .gov.tr yerine .gov)
-    # Eğer mail .co, .con veya .gov ile bitiyorsa kesinlikle eksik yazılmıştır.
-    if email.endswith(".co") or email.endswith(".con") or email.endswith(".gov"):
-        return False
-
-    return True
-
-def normalize_text(text):
-    if not text:
-        return ""
-    # Türkçe karakterleri İngilizce karşılıklarına çevirerek harf/büyük-küçük uyumsuzluğunu yok eder
-    tr_map = str.maketrans("IİıiĞğÜüŞşÖöÇç", "iiiigguussoocc")
-    text = text.translate(tr_map)
-    # Hepsini küçük harfe çevir ve aradaki boşlukları tamamen birleştir (Kusursuz eşleşme için)
-    return "".join(text.lower().split())
 
 def build_key(item):
     return item["class"] + "/" + item["file"]
@@ -275,36 +228,47 @@ def build_key(item):
 # ─────────────────────────────────────────────────────────────────
 # KORUMALI APPS SCRIPT ÇAĞRILARI
 # ─────────────────────────────────────────────────────────────────
-def get_email_status(ehash):
+
+def check_participant_code(code):
     try:
-        r = requests.get(APPS_SCRIPT_URL, params={"action": "check_email", "hash": ehash}, timeout=15)
+        r = requests.get(APPS_SCRIPT_URL, params={"action": "check_code", "code": code}, timeout=15)
         r.raise_for_status()
         return r.json()
-    except Exception as e:
-        st.error("Google sunucusuna bağlanılamadı. Lütfen internet bağlantınızı kontrol edip 'Devam Et' butonuna tekrar basın.")
+    except Exception:
+        st.error("Sunucuya bağlanılamadı. Lütfen internetinizi kontrol edin.")
         return None
 
-def upsert_lock(ehash, participant_id, completed, year, university, image_order_json):
+def create_new_participant(year, university, image_order_json):
+    # Kodu biz değil, Google (Apps Script) üretir ve bize yollar. Çakışma %0.
     try:
         r = requests.post(APPS_SCRIPT_URL, json={
-            "action": "lock", "hash": ehash,
-            "participant_id": participant_id, "completed": completed,
-            "year": year, "university": university,
-            "image_order": image_order_json,
+            "action": "create_participant",
+            "year": year, 
+            "university": university, 
+            "image_order": image_order_json
         }, timeout=15)
         r.raise_for_status()
-        return True
-    except Exception as e:
-        st.error("Giriş bilgileriniz veritabanına kaydedilemedi. Google sistemlerinde anlık yoğunluk olabilir, lütfen tekrar tıklayın.")
-        return False
+        res = r.json()
+        if res.get("ok"):
+            return res.get("code")
+        return None
+    except Exception:
+        st.error("Sunucu şu an çok yoğun. Lütfen 'Devam Et' butonuna tekrar basın.")
+        return None
+
+def update_participant_status(code, completed):
+    try:
+        requests.post(APPS_SCRIPT_URL, json={"action": "update_status", "code": code, "completed": completed}, timeout=10)
+    except:
+        pass
 
 def append_response(row):
     try:
         r = requests.post(APPS_SCRIPT_URL, json={"action": "response", "row": row}, timeout=15)
         r.raise_for_status()
         return True
-    except Exception as e:
-        st.error("Cevabınız kaydedilirken hata oluştu. Lütfen 'Cevapla' butonuna tekrar basınız.")
+    except Exception:
+        st.error("Cevabınız kaydedilirken hata oluştu. Lütfen tekrar basınız.")
         return False
 
 @st.cache_data(ttl=60)
@@ -316,6 +280,7 @@ def load_manifest():
 # ─────────────────────────────────────────────────────────────────
 # STATE
 # ─────────────────────────────────────────────────────────────────
+
 if "screen" not in st.session_state:
     st.session_state.screen = "welcome"
 if "idx" not in st.session_state:
@@ -332,18 +297,16 @@ if st.session_state.screen == "welcome":
     st.title(STUDY_TITLE)
 
     st.markdown(
-        "Bu anket, **derin öğrenme tabanlı bir yapay zeka modelinin** cilt lezyonu "
+        "Bu anket, **ConvNextLarge ve EfiicientNetV2M ensemble modelimizin** cilt lezyonu "
         "sınıflandırmasındaki tanı performansını, **dermatoloji asistan hekimlerinin** "
-        "klinik değerlendirmesiyle karşılaştırmayı amaçlayan bir tez çalışmasının parçasıdır."
+        "tanı performansı ile karşılaştırmayı amaçlayan tez çalışmasının parçasıdır."
     )
 
     st.markdown("#### Nasıl işleyecek?")
     st.markdown(
-        "- Sırayla **150 dermatoskopik görüntü** göreceksiniz (rastgele sırayla).\n"
+        "- Her katılımcıya rastgele sırayla **150 dermatoskopik görüntü** gösterilecek.\n"
         "- Her görüntü için, aşağıdaki **5 tanı sınıfından birini** seçeceksiniz.\n"
-        "- Ardından bu tanıya **ne kadar emin olduğunuzu 0–10 arası** puanlayacaksınız "
-        "(0 = tahmine yakın, 10 = tamamen eminim).\n"
-        "- Cevabınızı verdikten sonra bir sonraki görüntüye otomatik geçilecek."
+        "- Ardından bu tanıya **ne kadar emin olduğunuzu 1–10 arası** puanlayacaksınız (1: Tamamen Tahmin,  5: Orta Derece Eminim,  10: Kesinlikle Eminim). "
     )
 
     with st.expander("Değerlendirilecek 5 tanı sınıfı"):
@@ -359,16 +322,70 @@ if st.session_state.screen == "welcome":
     st.markdown(
         "- Ortalama süre **20–25 dakika**.\n"
         "- Cevaplarınız **anonim** olarak analiz edilecektir; sonuç raporlarında kimlik bilgisi yer almayacaktır.\n"
-        "- E-posta adresiniz **yalnızca** aynı kişinin anketi birden fazla doldurmasını engellemek için kullanılır, analizde görünmez.\n"
-        "- Anketi yarıda bırakırsanız cevaplarınız kaybolmaz; aynı e-posta ile devam ettiğinizde kaldığınız sorudan aynı sırayla devam edersiniz."
+        "- Ankete yeni başlayacaksanız ankete başla seçeneğini işaretleyiniz. Bu seçenekten sonra karşınıza bir kod gelecektir.\n"
+        "  İnternet bağlantısının kopması ya da anketi yarıda bırakma durumunda diğer girişlerde ankete devam et butonuna tıklayıp kodu sisteme girdiğinizde ankete kaldığınız yerden devam edebilirsiniz."
     )
 
     st.markdown("Katılımınız tamamen gönüllülük esasına dayanmaktadır. Desteğiniz için teşekkür ederiz.")
 
-    if st.button("Ankete Başla →", use_container_width=True):
-        st.session_state.screen = "demographics"
-        st.rerun()
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🆕 Yeni Ankete Başla", use_container_width=True):
+            st.session_state.screen = "demographics"
+            st.rerun()
+    with col2:
+        if st.button("🔄 Kaldığım Yerden Devam Et", use_container_width=True):
+            st.session_state.screen = "resume_login"
+            st.rerun()
 
+
+# ─────────────────────────────────────────────────────────────────
+# 2. KALDIĞIM YERDEN DEVAM ET EKRANI
+# ─────────────────────────────────────────────────────────────────
+elif st.session_state.screen == "resume_login":
+    st.header("Ankete Geri Dön")
+    entered_code = st.text_input("Size verilen 4 haneli kodu giriniz:", max_chars=4).upper()
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Sorgula ve Devam Et", use_container_width=True):
+            if len(entered_code) != 4:
+                st.error("Lütfen 4 haneli kodunuzu eksiksiz giriniz.")
+            else:
+                with st.spinner("Kodunuz kontrol ediliyor..."):
+                    status = check_participant_code(entered_code)
+                    
+                    if status and status.get("found"):
+                        if status.get("completed"):
+                            st.session_state.correct_count = status.get("correct_count", 0)
+                            st.session_state.participant_code = entered_code
+                            st.session_state.screen = "finished"
+                            st.rerun()
+                        else:
+                            manifest = load_manifest()
+                            by_key = {build_key(it): it for it in manifest}
+                            order_keys = json.loads(status.get("image_order") or "[]")
+                            answered = set(status.get("answered_images", []))
+
+                            remaining_keys = [k for k in order_keys if k not in answered]
+                            st.session_state.images = [by_key[k] for k in remaining_keys if k in by_key]
+                            st.session_state.total_questions = len(order_keys) if order_keys else len(manifest)
+                            st.session_state.answered_offset = len(answered)
+                            st.session_state.participant_code = entered_code
+                            st.session_state.image_order_json = status.get("image_order") or "[]"
+                            st.session_state.demographics = {"year": status.get("year"), "university": status.get("university")}
+                            st.session_state.idx = 0
+                            st.session_state.correct_count = status.get("correct_count", 0)
+                            st.session_state.screen = "survey"
+                            st.rerun()
+                    elif status and not status.get("found"):
+                        st.error("Geçersiz kod! Lütfen kodu doğru girdiğinizden emin olun veya yeni anket başlatın.")
+    with col2:
+        if st.button("Geri Dön", use_container_width=True):
+            st.session_state.screen = "welcome"
+            st.rerun()
+            
 # ─────────────────────────────────────────────────────────────────
 # DEMOGRAPHICS EKRANI
 # ─────────────────────────────────────────────────────────────────
@@ -399,109 +416,49 @@ elif st.session_state.screen == "demographics":
             st.error("Lütfen listeden kurumunuzu seçin.")
         elif secilen_kurum == "Diğer (Listede yok, kendim yazmak istiyorum)" and len(university.strip()) < 5:
             st.error("Lütfen kurum adını eksiksiz yazınız.")
-        elif not email.strip():
-            st.error("Lütfen e-posta adresinizi yazın.")
-        elif not is_valid_email(email):
-            st.error("Lütfen geçerli ve eksiksiz bir e-posta adresi girin (Örn: ornek@gmail.com veya kurum@saglik.gov.tr).")
         else:
-            with st.spinner("Katılımcı durumu kontrol ediliyor…"):
-                ehash = email_hash(email)
-                status = get_email_status(ehash)
-
-                if status is None:
-                    pass  # İnternet/Sunucu hatası
-
-                elif status.get("completed"):
-                    stored_year = status.get("year", "")
-                    stored_university = status.get("university", "")
-
-                    # Anket bitmiş olsa bile doğru bilgileri girmesini zorunlu kılıyoruz
-                    if (stored_year and str(stored_year) != str(year)) or (stored_university and stored_university != university):
-                        st.error(
-                            f"⚠️ **BİLGİ UYUŞMAZLIĞI:** Bu e-posta adresi ile daha önce "
-                            f"**{stored_year}** kıdemi ve **{stored_university}** kurumu ile kayıt oluşturulmuş. "
-                            "Lütfen bilgilerinizi ilk girişinizdeki gibi seçerek tekrar 'Devam Et'e basın."
-                        )
-                    else:
-                        st.session_state.correct_count = status.get("correct_count", 0)
-                        st.session_state.screen = "blocked"
-                        st.rerun()
-
-                elif status.get("resume"):
-                    stored_year = status.get("year", "")
-                    stored_university = status.get("university", "")
-
-                    # YENİ KONTROL: Hem yılı hem de seçilen üniversiteyi kesin olarak kıyaslar
-                    if (stored_year and str(stored_year) != str(year)) or (stored_university and stored_university != university):
-                        st.error(
-                            f"⚠️ **BİLGİ UYUŞMAZLIĞI:** Bu e-posta adresi ile daha önce "
-                            f"**{stored_year}** kıdemi ve **{stored_university}** kurumu ile kayıt oluşturulmuş. "
-                            "Lütfen bilgilerinizi ilk girişinizdeki gibi seçerek tekrar 'Devam Et'e basın."
-                        )
+            with st.spinner("Sizin için eşsiz bir kod oluşturuluyor..."):
+                manifest = load_manifest()
+                images = manifest.copy()
+                random.shuffle(images)
+                order_json = json.dumps([build_key(it) for it in images])
                 
-                    else:
-                        manifest = load_manifest()
-                        by_key = {build_key(it): it for it in manifest}
+                # Kodu Google'dan güvenle çekiyoruz!
+                generated_code = create_new_participant(year, university.strip(), order_json)
+                
+                if generated_code:
+                    st.session_state.images = images
+                    st.session_state.total_questions = len(manifest)
+                    st.session_state.answered_offset = 0
+                    st.session_state.participant_code = generated_code
+                    st.session_state.image_order_json = order_json
+                    st.session_state.demographics = {"year": year, "university": university.strip()}
+                    st.session_state.idx = 0
+                    st.session_state.correct_count = 0
+                    st.session_state.screen = "show_code"
+                    st.rerun()
 
-                        order_keys = json.loads(status.get("image_order") or "[]")
-                        answered = set(status.get("answered_images", []))
-
-                        remaining_keys = [k for k in order_keys if k not in answered]
-                        remaining_items = [by_key[k] for k in remaining_keys if k in by_key]
-
-                        st.session_state.images = remaining_items
-                        st.session_state.total_questions = len(order_keys) if order_keys else len(manifest)
-                        st.session_state.answered_offset = len(answered)
-                        st.session_state.participant_id = status["participant_id"]
-                        st.session_state.email_hash = ehash
-                        st.session_state.image_order_json = status.get("image_order") or "[]"
-                        st.session_state.demographics = {"year": stored_year, "university": stored_university}
-                        st.session_state.idx = 0
-                        st.session_state.correct_count = status.get("correct_count", 0)
-                        st.session_state.screen = "survey"
-                        st.rerun()
-
-                else:
-                    # YENİ KATILIMCI
-                    manifest = load_manifest()
-                    images = manifest.copy()
-                    random.shuffle(images)
-
-                    order_json = json.dumps([build_key(it) for it in images])
-                    participant_id = ehash[:10] + "-" + datetime.now().strftime("%H%M%S")
-
-                    if upsert_lock(ehash, participant_id, False, year, university.strip(), order_json):
-                        st.session_state.images = images
-                        st.session_state.total_questions = len(manifest)
-                        st.session_state.answered_offset = 0
-                        st.session_state.participant_id = participant_id
-                        st.session_state.email_hash = ehash
-                        st.session_state.image_order_json = order_json
-                        st.session_state.demographics = {"year": year, "university": university.strip()}
-                        st.session_state.idx = 0
-                        st.session_state.correct_count = 0
-                        st.session_state.screen = "survey"
-                        st.rerun()
 
 # ─────────────────────────────────────────────────────────────────
-# BLOCKED EKRANI
+# 4. KOD GÖSTERİM EKRANI
+# ─────────────────────────────────────────────────────────────────
+elif st.session_state.screen == "show_code":
+    st.warning("⚠️ LÜTFEN BU KODU BİR YERE NOT EDİN!")
+    st.markdown(f"<h1 style='text-align: center; color: #ff4b4b; font-size: 4rem; letter-spacing: 5px;'>{st.session_state.participant_code}</h1>", unsafe_allow_html=True)
+    st.write("Anketi yarıda bırakırsanız, bu **4 haneli eşsiz kod** ile tamamen kaldığınız sorudan devam edebilirsiniz.")
+    st.write("KVKK gereği e-posta almıyoruz. Bu yüzden kodunuzu kaybederseniz baştan başlamak zorunda kalırsınız.")
+    
+    if st.button("Kodu Not Aldım, Ankete Başla →", use_container_width=True):
+        st.session_state.screen = "survey"
+        st.rerun()
+
+
+# ─────────────────────────────────────────────────────────────────
+# 5. SURVEY EKRANI (Buton Kilit Korumalı)
 # ─────────────────────────────────────────────────────────────────
 
-elif st.session_state.screen == "blocked":
-    st.header("Bu anket zaten tamamlanmış.")
-    st.write("Girdiğiniz e-posta adresiyle daha önce tüm sorular tamamlanmış. Her katılımcı anketi yalnızca bir kez doldurabilir.")
-    acc = (st.session_state.get("correct_count", 0) / 150) * 100
-    st.info(f"**Geçmiş katılımınızdaki Doğruluk Oranınız:** %{acc:.1f}")
-
-# ─────────────────────────────────────────────────────────────────
-# SURVEY EKRANI
-# ─────────────────────────────────────────────────────────────────
-# ─────────────────────────────────────────────────────────────────
-# SURVEY EKRANI
-# ─────────────────────────────────────────────────────────────────
 elif st.session_state.screen == "survey":
     remaining_total = len(st.session_state.images)
-
     if remaining_total == 0 or st.session_state.idx >= remaining_total:
         st.session_state.screen = "finished"
         st.rerun()
@@ -510,43 +467,31 @@ elif st.session_state.screen == "survey":
     item = st.session_state.images[idx]
     key = build_key(item)
     url = GITHUB_BASE + key
-
     total = st.session_state.total_questions
     offset = st.session_state.answered_offset
     question_number = offset + idx + 1
     is_last = (idx == remaining_total - 1)
 
     st.progress((offset + idx) / total)
-    st.caption(f"Soru {question_number} / {total}")
+    st.caption(f"Soru {question_number} / {total} | 🔑 Kodunuz: **{st.session_state.participant_code}**")
     st.image(url, use_container_width=True)
 
-    choice = st.radio(
-        "Bu lezyon için tanınız nedir?",
-        list(CLASS_LABELS.keys()),
-        format_func=lambda k: CLASS_LABELS[k],
-        index=None,
-        key=f"choice_{idx}",
-    )
+    choice = st.radio("Bu lezyon için tanınız nedir?", list(CLASS_LABELS.keys()), format_func=lambda k: CLASS_LABELS[k], index=None, key=f"choice_{idx}")
     confidence = st.slider("Bu tanıya ne kadar eminsiniz?", 0, 10, value=5, key=f"conf_{idx}")
 
     btn_label = "Cevapla ve Anketi Bitir" if is_last else "Cevapla ve Sonraki Soru →"
-
-    # YENİ 1: Eğer işlem sürüyorsa veya boş bırakıldıysa butonu otomatik kilitle (Grileştir)
     btn_disabled = (choice is None) or st.session_state.get("is_processing", False)
 
     if st.button(btn_label, use_container_width=True, disabled=btn_disabled):
-        # Butona basılır basılmaz sistemi kilitle ve ekranı 1 saliseliğine yenileyip butonu gri yap
         st.session_state.is_processing = True
         st.rerun()
 
-    # YENİ 2: Buton kilitlendiğinde devreye giren kayıt mekanizması
     if st.session_state.get("is_processing", False):
         with st.spinner("Cevap kaydediliyor, lütfen bekleyin..."):
             is_correct = (choice == item["class"])
             d = st.session_state.demographics
             row = [
-                st.session_state.participant_id,
-                st.session_state.email_hash,
+                st.session_state.participant_code,
                 d["year"],
                 d["university"],
                 question_number,
@@ -558,45 +503,37 @@ elif st.session_state.screen == "survey":
                 datetime.now().isoformat(),
             ]
 
-            # Kayıt başarılı olursa kilitleri aç ve diğer soruya geç
             if append_response(row):
                 if is_correct:
                     st.session_state.correct_count += 1
                 if is_last:
-                    upsert_lock(
-                        st.session_state.email_hash, st.session_state.participant_id, True,
-                        d["year"], d["university"], st.session_state.image_order_json,
-                    )
+                    update_participant_status(st.session_state.participant_code, True)
                     st.session_state.screen = "finished"
                 else:
                     st.session_state.idx += 1
-                
                 st.session_state.is_processing = False
                 st.rerun()
             else:
-                # Eğer internet kopması vb. bir hata olursa kilidi aç (Tekrar deneyebilsinler)
                 st.session_state.is_processing = False
                 st.rerun()
-
+                
 # ─────────────────────────────────────────────────────────────────
-# FINISHED EKRANI
+# 6. FINISHED EKRANI
 # ─────────────────────────────────────────────────────────────────
 elif st.session_state.screen == "finished":
     st.balloons()
     st.success("Tebrikler! 150 değerlendirmenin tamamını bitirdiniz.")
-    st.caption(f"Katılımcı Kodunuz: {st.session_state.get('participant_id', '')}")
+    st.caption(f"Katılımcı Kodunuz: **{st.session_state.get('participant_code', '')}**")
 
-    # Doğruluk Oranı Hesaplama
     correct = st.session_state.get("correct_count", 0)
     total = st.session_state.get("total_questions", 150)
     user_acc = (correct / total) * 100 if total > 0 else 0
 
     st.markdown("---")
     st.markdown("### 📊 Sonuç Karşılaştırması")
-    st.write("Sizin klinik değerlendirme başarınız ile geliştirilen Yapay Zeka modelinin performansı aşağıdadır:")
-
     col1, col2 = st.columns(2)
     with col1:
-        st.metric(label="Sizin Doğruluk Oranınız", value=f"%{user_acc:.1f}", delta=f"{correct} Doğru")
+        st.metric(label="👨‍⚕️ Sizin Doğruluk Oranınız", value=f"%{user_acc:.1f}", delta=f"{correct} / {total} Doğru")
     with col2:
-        st.metric(label="Yapay Zeka (AI) Doğruluk Oranı", value=f"%{AI_ACCURACY}")
+        st.metric(label="🤖 Yapay Zeka (AI) Doğruluk Oranı", value=f"%{AI_ACCURACY}")
+    st.markdown("---")
