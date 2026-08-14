@@ -14,7 +14,7 @@ CİLT LEZYONU DEĞERLENDİRME ANKETİ
 """
 
 import streamlit as st
-import requests, random, hashlib, json, re
+import requests, random,json
 from datetime import datetime
 
 
@@ -216,8 +216,6 @@ CLASS_LABELS = {
     "DISPLASTIK_NEVUS": "Displastik Nevüs",
 }
 
-INSTITUTION_KEYWORDS = ["üniversite", "universite", "hastane", "hastanesi", "hastahane", "üniversitesi"]
-
 # ─────────────────────────────────────────────────────────────────
 # YARDIMCI FONKSİYONLAR
 # ─────────────────────────────────────────────────────────────────
@@ -405,11 +403,7 @@ elif st.session_state.screen == "demographics":
     else:
         university = secilen_kurum
 
-    email = st.text_input("E-posta adresiniz")
-
     if st.button("Devam Et →", use_container_width=True):
-        
-        # 2. YENİLİK: HATA KONTROLLERİ ÇOK DAHA BASİT HALE GELDİ
         if not year:
             st.error("Lütfen asistanlık yılınızı seçin.")
         elif secilen_kurum == "Lütfen Seçiniz...":
@@ -477,7 +471,7 @@ elif st.session_state.screen == "survey":
     st.image(url, use_container_width=True)
 
     choice = st.radio("Bu lezyon için tanınız nedir?", list(CLASS_LABELS.keys()), format_func=lambda k: CLASS_LABELS[k], index=None, key=f"choice_{idx}")
-    confidence = st.slider("Bu tanıya ne kadar eminsiniz?", 0, 10, value=5, key=f"conf_{idx}")
+    confidence = st.slider("Bu tanıya ne kadar eminsiniz?", min_value=1, max_value= 10, value=5, key=f"conf_{idx}")
 
     btn_label = "Cevapla ve Anketi Bitir" if is_last else "Cevapla ve Sonraki Soru →"
     btn_disabled = (choice is None) or st.session_state.get("is_processing", False)
