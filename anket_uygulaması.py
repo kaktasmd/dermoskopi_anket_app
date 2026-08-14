@@ -410,13 +410,13 @@ elif st.session_state.screen == "demographics":
     st.header("Önce birkaç bilgi")
     year = st.selectbox("Asistanlıkta kaçıncı yılındasınız?", [""] + YEAR_OPTIONS)
     
-    # 1. YENİLİK: TEXT INPUT YERİNE AÇILIR MENÜ (SELECTBOX)
+
     secilen_kurum = st.selectbox(
         "Hangi üniversitede/hastanede ihtisas yapıyorsunuz?",
         options=KURUM_LISTESI
     )
     
-    # Eğer "Diğer" seçilirse, manuel yazması için bir kutu göster
+   
     if secilen_kurum == "Diğer (Listede yok, kendim yazmak istiyorum)":
         university = st.text_input("Lütfen kurumunuzun adını tam olarak yazınız:")
     else:
@@ -456,7 +456,7 @@ elif st.session_state.screen == "demographics":
 # 4. KOD GÖSTERİM EKRANI
 # ─────────────────────────────────────────────────────────────────
 elif st.session_state.screen == "show_code":
-    st.warning("⚠️ LÜTFEN BU KODU BİR YERE NOT EDİN!")
+    st.warning(" LÜTFEN BU KODU BİR YERE NOT EDİN!")
     st.markdown(f"<h1 style='text-align: center; color: #ff4b4b; font-size: 4rem; letter-spacing: 5px;'>{st.session_state.participant_code}</h1>", unsafe_allow_html=True)
     st.write("Anketi yarıda bırakırsanız, bu **4 haneli eşsiz kod** ile tamamen kaldığınız sorudan devam edebilirsiniz.")
     st.write("KVKK gereği e-posta almıyoruz. Bu yüzden kodunuzu kaybederseniz baştan başlamak zorunda kalırsınız.")
@@ -486,7 +486,7 @@ elif st.session_state.screen == "survey":
     is_last = (idx == remaining_total - 1)
 
     st.progress((offset + idx) / total)
-    st.caption(f"Soru {question_number} / {total} | 🔑 Kodunuz: **{st.session_state.participant_code}**")
+    st.caption(f"Soru {question_number} / {total} |  Kodunuz: **{st.session_state.participant_code}**")
     st.image(url, use_container_width=True)
 
     choice = st.radio("Bu lezyon için tanınız nedir?", list(CLASS_LABELS.keys()), format_func=lambda k: CLASS_LABELS[k], index=None, key=f"choice_{idx}")
@@ -545,15 +545,15 @@ elif st.session_state.screen == "finished":
     user_acc = (correct / total) * 100 if total > 0 else 0
 
     st.markdown("---")
-    st.markdown("### 📊 Genel Sonuç Karşılaştırması")
+    st.markdown("###  Genel Sonuç Karşılaştırması")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric(label="👨‍⚕️ Sizin Toplam Doğruluk Oranınız", value=f"%{user_acc:.1f}", delta=f"{correct} / {total} Doğru")
+        st.metric(label=" Sizin Toplam Doğruluk Oranınız", value=f"%{user_acc:.1f}", delta=f"{correct} / {total} Doğru")
     with col2:
-        st.metric(label="🤖 Yapay Zeka (AI) Doğruluk Oranı", value=f"%{AI_ACCURACY}")
+        st.metric(label=" Yapay Zeka (AI) Doğruluk Oranı", value=f"%{AI_ACCURACY}")
     
     st.markdown("---")
-    st.markdown("### 🔍 Sınıf Bazlı Detaylı Karşılaştırma")
+    st.markdown("###  Sınıf Bazlı Detaylı Karşılaştırma")
     st.info("Tablodaki Yapay Zeka skorları, modelin o lezyon sınıfındaki Recall (Duyarlılık) değerlerini yansıtmaktadır.")
     
     # Karne Tablosunu Oluşturma
