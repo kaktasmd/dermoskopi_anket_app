@@ -344,11 +344,11 @@ if st.session_state.screen == "welcome":
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🆕 Yeni Ankete Başla", use_container_width=True):
+        if st.button(" Yeni Ankete Başla", use_container_width=True):
             st.session_state.screen = "demographics"
             st.rerun()
     with col2:
-        if st.button("🔄 Kaldığım Yerden Devam Et", use_container_width=True):
+        if st.button(" Kaldığım Yerden Devam Et", use_container_width=True):
             st.session_state.screen = "resume_login"
             st.rerun()
 
