@@ -206,6 +206,14 @@ APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypn-0lMNxwgQT_0UTZ-E
 
 AI_ACCURACY = 83.0
 
+AI_CLASS_SCORES = {
+    "NEVUS": 86.7,
+    "KERATOZ": 83.3,
+    "MELANOM": 83.3,
+    "NMSC": 93.3,
+    "DISPLASTIK_NEVUS": 70.0
+}
+
 STUDY_TITLE = "Cilt Lezyonu Değerlendirme Çalışması"
 YEAR_OPTIONS = ["<2 yıl", "2-4 yıl", "4 yıl ve üzeri"]
 CLASS_LABELS = {
@@ -295,8 +303,8 @@ if st.session_state.screen == "welcome":
     st.title(STUDY_TITLE)
 
     st.markdown(
-        "Bu anket, **ConvNextLarge ve EfiicientNetV2M ensemble modelimizin** cilt lezyonu "
-        "sınıflandırmasındaki tanı performansını, **dermatoloji asistan hekimlerinin** "
+        "Bu anket, **ConvNeXtLarge ve EfficientNetV2M ensemble modelimizin** cilt lezyonu "
+        "sınıflandırmasındaki tanı performansını, **dermatoloji hekimlerinin** "
         "tanı performansı ile karşılaştırmayı amaçlayan tez çalışmasının parçasıdır."
     )
 
@@ -319,9 +327,10 @@ if st.session_state.screen == "welcome":
     st.markdown("#### Süre ve gizlilik")
     st.markdown(
         "- Ortalama süre **20–25 dakika**.\n"
-        "- Cevaplarınız **anonim** olarak analiz edilecektir; sonuç raporlarında kimlik bilgisi yer almayacaktır.\n"
-        "- Ankete yeni başlayacaksanız ankete başla seçeneğini işaretleyiniz. Bu seçenekten sonra karşınıza bir kod gelecektir.\n"
-        "  İnternet bağlantısının kopması ya da anketi yarıda bırakma durumunda diğer girişlerde ankete devam et butonuna tıklayıp kodu sisteme girdiğinizde ankete kaldığınız yerden devam edebilirsiniz."
+        "- Cevaplarınız **anonim** olarak analiz edilecektir; ankete girişte herahangi bir kişisel bilgi(e-mail,telefon numarası, ad,soyad) istenmeyecektir.\n"
+        "- Ankete yeni başlayacaksanız ankete başla seçeneğini işaretleyiniz. Bu seçenekten sonra karşınıza bir **4 haneli bir kod ** gelecektir.\n"
+        " - İnternet bağlantısının kopması ya da anketi yarıda bırakma durumunda diğer girişlerde ankete devam et butonuna tıklayıp size tanımlanan özel kodu sisteme girdiğinizde ankete kaldığınız yerden devam edebilirsiniz."
+        " - **Anketin sonunda her hastalık sınıfı için kendi performansınızı ve modelin performansını görebileceksiniz.** " 
     )
 
     st.markdown("Katılımınız tamamen gönüllülük esasına dayanmaktadır. Desteğiniz için teşekkür ederiz.")
@@ -524,10 +533,39 @@ elif st.session_state.screen == "finished":
     user_acc = (correct / total) * 100 if total > 0 else 0
 
     st.markdown("---")
-    st.markdown("### 📊 Sonuç Karşılaştırması")
+    st.markdown("### 📊 Genel Sonuç Karşılaştırması")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric(label="👨‍⚕️ Sizin Doğruluk Oranınız", value=f"%{user_acc:.1f}", delta=f"{correct} / {total} Doğru")
+        st.metric(label="👨‍⚕️ Sizin Toplam Doğruluk Oranınız", value=f"%{user_acc:.1f}", delta=f"{correct} / {total} Doğru")
     with col2:
         st.metric(label="🤖 Yapay Zeka (AI) Doğruluk Oranı", value=f"%{AI_ACCURACY}")
+    
     st.markdown("---")
+    st.markdown("### 🔍 Sınıf Bazlı Detaylı Karşılaştırma")
+    st.info("Tablodaki Yapay Zeka skorları, modelin o lezyon sınıfındaki Recall (Duyarlılık) değerlerini yansıtmaktadır.")
+    
+    # Karne Tablosunu Oluşturma
+    table_data = []
+    for cls_key, cls_label in CLASS_LABELS.items():
+        c_data = st.session_state.class_scores.get(cls_key, {"correct": 0, "total": 0})
+        user_c = c_data["correct"]
+        user_t = c_data["total"]
+        
+        # O sınıfta hiç soru çözülmediyse %0 göster, 0'a bölünme hatasını engelle
+        user_class_acc = (user_c / user_t * 100) if user_t > 0 else 0
+        ai_class_acc = AI_CLASS_SCORES[cls_key]
+        
+        # Başarı farkını hesaplama
+        diff = user_class_acc - ai_class_acc
+        diff_str = f"+%{diff:.1f}" if diff > 0 else f"%{diff:.1f}"
+        
+        table_data.append({
+            "Tanı Sınıfı": cls_label,
+            "Sizin Başarınız": f"%{user_class_acc:.1f} ({user_c}/{user_t})",
+            "Yapay Zeka": f"%{ai_class_acc:.1f}",
+            "Fark": diff_str
+        })
+        
+    st.table(table_data)
+    st.markdown("---")
+    st.markdown("Değerli vaktinizi ayırdığınız ve bu bilimsel çalışmaya katkı sağladığınız için teşekkür ederiz.")
