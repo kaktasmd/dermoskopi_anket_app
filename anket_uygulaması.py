@@ -7,11 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1rkC6ljH5sICU2AIUXZaFAGWrdPXFhKmu
 """
 
-"""
-
-CİLT LEZYONLARININ DERMOSKOPİK GÖRÜNTÜSÜNÜN DEĞERLENDİRİLMESİ ANKETİ
-
-"""
 
 import streamlit as st
 import requests, random,json
@@ -214,7 +209,7 @@ AI_CLASS_SCORES = {
     "DISPLASTIK_NEVUS": 70.0
 }
 
-STUDY_TITLE = "Cilt Lezyonu Değerlendirme Çalışması"
+STUDY_TITLE = "Cilt Lezyonlarının Dermoskopik Görüntülerinin Değerlendirilmesi Anketi"
 YEAR_OPTIONS = ["<2 yıl", "2-4 yıl", "4 yıl ve üzeri"]
 CLASS_LABELS = {
     "NEVUS": "Nevüs",
