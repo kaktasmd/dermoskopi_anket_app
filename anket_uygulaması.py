@@ -471,7 +471,7 @@ elif st.session_state.screen == "survey":
     st.image(url, use_container_width=True)
 
     choice = st.radio("Bu lezyon için tanınız nedir?", list(CLASS_LABELS.keys()), format_func=lambda k: CLASS_LABELS[k], index=None, key=f"choice_{idx}")
-    confidence = st.slider("Bu tanıya ne kadar eminsiniz?", min_value=1, max_value= 10, value=5, key=f"conf_{idx}")
+    confidence = st.slider("Bu tanıdan ne kadar eminsiniz? (1: Tamamen Tahmin, 5: Orta Derece Eminim, 10: Kesinlikle Eminim)", min_value=1, max_value= 10, value=5, key=f"conf_{idx}")
 
     btn_label = "Cevapla ve Anketi Bitir" if is_last else "Cevapla ve Sonraki Soru →"
     btn_disabled = (choice is None) or st.session_state.get("is_processing", False)
