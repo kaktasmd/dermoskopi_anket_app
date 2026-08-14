@@ -292,6 +292,14 @@ if "class_scores" not in st.session_state:
     st.session_state.class_scores = {k: {"correct": 0, "total": 0} for k in CLASS_LABELS.keys()}
 
 st.set_page_config(page_title=STUDY_TITLE, page_icon="🩺", layout="centered")
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        </style>
+        """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────
 # WELCOME EKRANI
