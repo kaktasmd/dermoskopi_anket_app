@@ -330,9 +330,9 @@ if st.session_state.screen == "welcome":
     st.markdown(
         "- Ortalama süre **20–25 dakika**.\n"
         "- Cevaplarınız **anonim** olarak analiz edilecektir; ankete girişte herhangi bir kişisel bilgi(e-mail,telefon numarası, ad,soyad) istenmeyecektir.\n"
-        "- Ankete yeni başlayacaksanız ankete başla seçeneğini işaretleyiniz. Bu seçenekten sonra karşınıza bir **4 haneli bir kod ** gelecektir.\n"
+        "- Ankete yeni başlayacaksanız ankete başla seçeneğini işaretleyiniz. Bu seçenekten sonra karşınıza bir **4 haneli bir kod** gelecektir.\n"
         " - İnternet bağlantısının kopması ya da anketi yarıda bırakma durumunda diğer girişlerde ankete devam et butonuna tıklayıp size tanımlanan özel kodu sisteme girdiğinizde ankete kaldığınız yerden devam edebilirsiniz.\n"
-        " - **Anketin sonunda her hastalık sınıfı için kendi performansınızı ve modelin performansını görebileceksiniz.** " 
+        " - **Anketin sonunda her hastalık sınıfı için kendi performansınızı ve modelin performansını görebileceksiniz** " 
     )
 
     st.markdown("Katılımınız tamamen gönüllülük esasına dayanmaktadır. Desteğiniz için teşekkür ederiz.")
