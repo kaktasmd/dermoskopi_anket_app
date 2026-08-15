@@ -311,7 +311,7 @@ if st.session_state.screen == "welcome":
         "Bu tez çalışmasında , **ConvNeXtLarge ve EfficientNetV2M ensemble modelimizin** cilt lezyonlarının dermoskopik görüntülerinin "
         "sınıflandırması sonucunda elde ettiği tanı performansının, **dermatoloji hekimlerinin** "
         "tanı performansı ile karşılaştırılması amaçlanmaktadır. Yapay zekanın hızlı bir şekilde geliştiği bu dönemde,"
-        "mevcut modellerin etkinliğinin ve kullanımının ortaya konması, gelecekteki dermatoloji pratiğinde yapay zekanın üstleneceği role dair önemli ipuçları sunacaktır.
+        "mevcut modellerin etkinliğinin ve kullanımının ortaya konması, gelecekteki dermatoloji pratiğinde yapay zekanın üstleneceği role dair önemli ipuçları sunacaktır."
         "Geliştirilen bu modelin hekim performansına nekadar yaklaştığının tespit edilmesi, bu alanda yapay zeka destekli yeni nesil tanı araçlarının geliştirilmesine zemin hazırlayacaktır."
     )
 
