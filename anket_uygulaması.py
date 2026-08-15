@@ -492,11 +492,15 @@ elif st.session_state.screen == "survey":
     st.caption(f"Soru {question_number} / {total} |  Kodunuz: **{st.session_state.participant_code}**")
     st.image(url, use_container_width=True)
 
-    choice = st.radio("Bu lezyon için tanınız nedir?", list(CLASS_LABELS.keys()), format_func=lambda k: CLASS_LABELS[k], index=None, key=f"choice_{idx}")
-    confidence = st.slider("Bu tanıdan ne kadar eminsiniz? (1: Tamamen Tahmin | 3: Az Eminim | 5: Orta Derece Eminim | 7: Oldukça Eminim | 10: Kesinlikle Eminim)", min_value=1, max_value= 10, value=5, key=f"conf_{idx}")
+    # İşlem durumunu kontrol eden değişkeni en başa alıyoruz
+    is_proc = st.session_state.get("is_processing", False)
+
+    # Şıklara ve Slider'a 'disabled=is_proc' kilidi eklendi!
+    choice = st.radio("Bu lezyon için tanınız nedir?", list(CLASS_LABELS.keys()), format_func=lambda k: CLASS_LABELS[k], index=None, key=f"choice_{idx}", disabled=is_proc)
+    confidence = st.slider("Bu tanıdan ne kadar eminsiniz? (1: Tamamen Tahmin | 3: Az Eminim | 5: Orta Derece Eminim | 7: Oldukça Eminim | 10: Kesinlikle Eminim)", min_value=1, max_value= 10, value=5, key=f"conf_{idx}", disabled=is_proc)
 
     btn_label = "Cevapla ve Anketi Bitir" if is_last else "Cevapla ve Sonraki Soru →"
-    btn_disabled = (choice is None) or st.session_state.get("is_processing", False)
+    btn_disabled = (choice is None) or is_proc
 
     if st.button(btn_label, use_container_width=True, disabled=btn_disabled):
         st.session_state.is_processing = True
