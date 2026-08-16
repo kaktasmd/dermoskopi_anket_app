@@ -413,7 +413,7 @@ elif st.session_state.screen == "resume_login":
 elif st.session_state.screen == "demographics":
     st.header("Önce birkaç bilgi")
     
-    year = st.text_input("Asistanlıkta kaçıncı yılındasınız? (Örn: 2 yıl 8 ay, 15 ay, 3. yıl vb.)")
+    year = st.text_input("Asistanlıkta/Meslekte kaçıncı yılındasınız? (Örn: 2 yıl 8 ay, 15 ay, 3. yıl vb.)")
     
 
     secilen_kurum = st.selectbox(
