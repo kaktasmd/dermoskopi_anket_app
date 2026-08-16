@@ -310,15 +310,15 @@ if st.session_state.screen == "welcome":
     st.markdown(
         "Bu tez çalışmasında , **ConvNeXtLarge ve EfficientNetV2M ensemble modelimizin** cilt lezyonlarının dermoskopik görüntülerinin "
         "sınıflandırması sonucunda elde ettiği tanı performansının, **dermatoloji hekimlerinin** "
-        "tanı performansı ile karşılaştırılması amaçlanmaktadır. Yapay zekanın hızlı bir şekilde geliştiği bu dönemde,"
+        "tanı performansı ile karşılaştırılması amaçlanmaktadır. Tez çalışmasının amacı gereği hastalara ait klinik bilgi (yaş,lezyon lokasyonu vb.) verilmeyecektir. Yapay zekanın hızlı bir şekilde geliştiği bu dönemde,"
         "mevcut modellerin etkinliğinin ve kullanımının ortaya konması, gelecekteki dermatoloji pratiğinde yapay zekanın üstleneceği role dair önemli ipuçları sunacaktır."
         "Geliştirilen bu modelin hekim performansına ne kadar yaklaştığının tespit edilmesi, bu alanda yapay zeka destekli tanı araçlarının geliştirilmesine zemin hazırlayacaktır."
-        "Bundan dolayı bu tez çalışmasına katılmanız dermatoloji pratiği açısından çok kıymetli. Katılımınız için şimdiden teşekkür ederiz."
+        "Bundan dolayı bu tez çalışmasına katılmanız dermatoloji pratiği açısından çok kıymetlidir. Katılımınız için şimdiden teşekkür ederiz."
     )
 
     st.markdown("#### Nasıl işleyecek?")
     st.markdown(
-        "- Her katılımcıya rastgele sırayla **150 dermatoskopik görüntü** gösterilecek.\n"
+        "- Her katılımcıya rastgele sırayla **150 dermatoskopik görüntü** gösterilecek.**(Tüm dermoskopik görüntülerin patolojik tanısı mevcutttur)**\n"
         "- Her görüntü için, aşağıdaki **5 tanı sınıfından birini** seçeceksiniz.\n"
         "- Ardından bu tanıya ne kadar emin olduğunuzu **1–10 arası** puanlayacaksınız **(1: Tamamen Tahmin | 3: Az Eminim | 5: Orta Derece Eminim | 7: Oldukça Eminim | 10: Kesinlikle Eminim)**."
     )
