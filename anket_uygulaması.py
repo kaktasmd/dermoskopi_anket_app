@@ -465,8 +465,8 @@ elif st.session_state.screen == "demographics":
 elif st.session_state.screen == "show_code":
     st.warning(" LÜTFEN BU KODU BİR YERE NOT EDİN!")
     st.markdown(f"<h1 style='text-align: center; color: #ff4b4b; font-size: 4rem; letter-spacing: 5px;'>{st.session_state.participant_code}</h1>", unsafe_allow_html=True)
-    st.write("Anketi yarıda bırakırsanız, bu **4 haneli eşsiz kod** ile tamamen kaldığınız sorudan devam edebilirsiniz.")
-    st.write("KVKK gereği e-posta almıyoruz. Bu yüzden kodunuzu kaybederseniz baştan başlamak zorunda kalırsınız.")
+    st.write("Anketi yarıda bırakırsanız, bu **4 haneli kod** ile kaldığınız sorudan devam edebilirsiniz.")
+    st.write("Size verilen kodunuzu kaybetmeniz durumunda ankete baştan başlamak zorunda kalırsınız.")
     
     if st.button("Kodu Not Aldım, Ankete Başla →", use_container_width=True):
         st.session_state.screen = "survey"
