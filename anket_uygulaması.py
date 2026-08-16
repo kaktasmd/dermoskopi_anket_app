@@ -411,7 +411,8 @@ elif st.session_state.screen == "resume_login":
 # ─────────────────────────────────────────────────────────────────
 elif st.session_state.screen == "demographics":
     st.header("Önce birkaç bilgi")
-    year = st.selectbox("Asistanlıkta kaçıncı yılındasınız?", [""] + YEAR_OPTIONS)
+    
+    year = st.text_input("Asistanlıkta kaçıncı yılındasınız? (Örn: 2 yıl 8 ay, 15 ay, 3. yıl vb.)")
     
 
     secilen_kurum = st.selectbox(
@@ -426,8 +427,11 @@ elif st.session_state.screen == "demographics":
         university = secilen_kurum
 
     if st.button("Devam Et →", use_container_width=True):
+        kontrol_metni = year.lower().replace("yıl", "").replace("yil", "").replace("ay", "").replace(" ", "").replace(".", "").replace(",", "")
         if not year:
-            st.error("Lütfen asistanlık yılınızı seçin.")
+            st.error("Lütfen asistanlık yılınızı yazınız.")
+        elif not (kontrol_metni.isdigit() and any(c.isdigit() for c in year)):
+            st.error("Lütfen kıdeminizi sadece sayı, 'yıl' veya 'ay' kelimeleriyle yazınız (Örn: 2 yıl 8 ay, 15 ay, 3).")
         elif secilen_kurum == "Lütfen Seçiniz...":
             st.error("Lütfen listeden kurumunuzu seçin.")
         elif secilen_kurum == "Diğer (Listede yok, kendim yazmak istiyorum)" and len(university.strip()) < 5:
