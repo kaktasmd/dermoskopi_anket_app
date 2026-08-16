@@ -340,6 +340,7 @@ if st.session_state.screen == "welcome":
         "- İnternet bağlantısının kopması ya da anketi yarıda bırakma durumunda, diğer girişlerde 'Kaldığım Yerden Devam Et' butonuna tıklayıp size tanımlanan özel kodu sisteme girdiğinizde ankete kaldığınız yerden devam edebilirsiniz.\n"
         "- **Anketin sonunda her hastalık sınıfı için kendi performansınızı ve modelin performansını görebileceksiniz.**\n"
         "- **Görüntüler ISIC Archive ve SDÜ Dermatoloji Anabilim Dalı'nda kullanılan FotoFinder cihazından elde edilmiştir. Fotoğraflar arasında kontrast, parlaklık ve çözünürlük açısından farklılıklar olabilir.**"
+        "- Uygulamada meydana gelebilecek herhangi bir aksaklık veya hata durumunda her zaman iletişime geçebilirsiniz."
     )
 
     st.markdown("Katılımınız tamamen gönüllülük esasına dayanmaktadır. Desteğiniz için teşekkür ederiz.")
