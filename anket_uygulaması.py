@@ -318,7 +318,7 @@ if st.session_state.screen == "welcome":
 
     st.markdown("#### Nasıl işleyecek?")
     st.markdown(
-        "- Her katılımcıya rastgele sırayla **150 dermatoskopik görüntü** gösterilecek.**(Tüm dermoskopik görüntülerin patolojik tanısı mevcutttur)**\n"
+        "- Her katılımcıya rastgele sırayla **150 dermatoskopik görüntü** gösterilecek.\n"
         "- Her görüntü için, aşağıdaki **5 tanı sınıfından birini** seçeceksiniz.\n"
         "- Ardından bu tanıya ne kadar emin olduğunuzu **1–10 arası** puanlayacaksınız **(1: Tamamen Tahmin | 3: Az Eminim | 5: Orta Derece Eminim | 7: Oldukça Eminim | 10: Kesinlikle Eminim)**."
     )
