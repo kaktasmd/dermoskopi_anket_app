@@ -199,14 +199,14 @@ MANIFEST_URL = GITHUB_BASE + "manifest.json"
 # YENİ ALDIĞINIZ WEB APP URL'SİNİ BURAYA YAPIŞTIRIN:
 APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypn-0lMNxwgQT_0UTZ-EmIWMCgJvpR_Te0RsEPS7Y2chnJe_8VBPDCqYNYD3Bm1887dQ/exec"
 
-AI_ACCURACY = 83.3
+AI_ACCURACY = 70.0
 
 AI_CLASS_SCORES = {
-    "NEVUS": 86.7,
-    "KERATOZ": 83.3,
-    "MELANOM": 83.3,
-    "NMSC": 93.3,
-    "DISPLASTIK_NEVUS": 70.0
+    "NEVUS": 76.6,
+    "KERATOZ": 70.0,
+    "MELANOM": 76.6,
+    "NMSC": 82.5,
+    "DISPLASTIK_NEVUS": 40.0
 }
 
 STUDY_TITLE = "Cilt Lezyonlarının Dermoskopik Görüntülerinin Değerlendirilmesi"
