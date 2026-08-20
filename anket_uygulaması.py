@@ -199,13 +199,13 @@ MANIFEST_URL = GITHUB_BASE + "manifest.json"
 # YENİ ALDIĞINIZ WEB APP URL'SİNİ BURAYA YAPIŞTIRIN:
 APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypn-0lMNxwgQT_0UTZ-EmIWMCgJvpR_Te0RsEPS7Y2chnJe_8VBPDCqYNYD3Bm1887dQ/exec"
 
-AI_ACCURACY = 70.0
+AI_ACCURACY = 70.6
 
 AI_CLASS_SCORES = {
     "NEVUS": 76.6,
     "KERATOZ": 70.0,
     "MELANOM": 76.6,
-    "NMSC": 82.5,
+    "NMSC": 90.0,
     "DISPLASTIK_NEVUS": 40.0
 }
 
@@ -308,7 +308,7 @@ if st.session_state.screen == "welcome":
     st.title(STUDY_TITLE)
 
     st.markdown(
-        "Bu tez çalışmasında , **ConvNeXtLarge ve EfficientNetV2M ensemble modelimizin** cilt lezyonlarının dermoskopik görüntülerinin "
+        "Bu tez çalışmasında , **ConvNeXtLarge modelimizin** cilt lezyonlarının dermoskopik görüntülerinin "
         "sınıflandırması sonucunda elde ettiği tanı performansının, **dermatoloji hekimlerinin** "
         "tanı performansı ile karşılaştırılması amaçlanmaktadır. Tez çalışmasının amacı gereği hastalara ait klinik bilgi (yaş,lezyon lokasyonu vb.) verilmeyecektir. Yapay zekanın hızlı bir şekilde geliştiği bu dönemde,"
         "mevcut modellerin etkinliğinin ve kullanımının ortaya konması, gelecekteki dermatoloji pratiğinde yapay zekanın üstleneceği role dair önemli ipuçları sunacaktır."
