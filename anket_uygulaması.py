@@ -197,7 +197,7 @@ GITHUB_BASE = "https://raw.githubusercontent.com/kaktasmd/tez_anket_gorseller/ma
 MANIFEST_URL = GITHUB_BASE + "manifest.json"
 
 # YENİ ALDIĞINIZ WEB APP URL'SİNİ BURAYA YAPIŞTIRIN:
-APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypn-0lMNxwgQT_0UTZ-EmIWMCgJvpR_Te0RsEPS7Y2chnJe_8VBPDCqYNYD3Bm1887dQ/exec"
+APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOMXKfvKFRzPCcpCVIbSax63tllX00HX38MTviTrtSg2Si4c6kpwEGVnkspV72I0-MDQ/exec"
 
 AI_ACCURACY = 70.6
 
