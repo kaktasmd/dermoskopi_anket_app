@@ -545,7 +545,7 @@ elif st.session_state.screen == "survey":
                 st.rerun()
                 
 # ─────────────────────────────────────────────────────────────────
-# 6. FINISHED EKRANI
+# 6. FINISHED EKRANI (İnceleme Paneli İle Birlikte)
 # ─────────────────────────────────────────────────────────────────
 elif st.session_state.screen == "finished":
     st.balloons()
@@ -557,7 +557,7 @@ elif st.session_state.screen == "finished":
     user_acc = (correct / total) * 100 if total > 0 else 0
 
     st.markdown("---")
-    st.markdown("###  Genel Sonuç Karşılaştırması")
+    st.markdown("### 📊 Genel Sonuç Karşılaştırması")
     col1, col2 = st.columns(2)
     with col1:
         st.metric(label=" Sizin Toplam Doğruluk Oranınız", value=f"%{user_acc:.1f}", delta=f"{correct} / {total} Doğru")
@@ -565,7 +565,7 @@ elif st.session_state.screen == "finished":
         st.metric(label=" Yapay Zeka (AI) Doğruluk Oranı", value=f"%{AI_ACCURACY}")
     
     st.markdown("---")
-    st.markdown("###  Sınıf Bazlı Detaylı Karşılaştırma")
+    st.markdown("### 📑 Sınıf Bazlı Detaylı Karşılaştırma")
     st.info("Tablodaki Yapay Zeka skorları, modelin o lezyon sınıfındaki Recall (Duyarlılık) değerlerini yansıtmaktadır.")
     
     # Karne Tablosunu Oluşturma
@@ -591,5 +591,56 @@ elif st.session_state.screen == "finished":
         })
         
     st.table(table_data)
+
+    # ==========================================
+    # YENİ EKLENEN KISIM: SORU İNCELEME PANELİ
+    # ==========================================
+    st.markdown("---")
+    st.markdown("### 🔍 Geçmiş Soruları İnceleme")
+    st.write("Doğru (🟢) veya Yanlış (🔴) yaptığınız soruların numaralarına tıklayarak görseli ve detayları görebilirsiniz.")
+
+    # Veriyi Excel'den Çekme
+    if "history" not in st.session_state:
+        with st.spinner("Cevap geçmişiniz hazırlanıyor..."):
+            status = check_participant_code(st.session_state.participant_code)
+            if status and "history" in status:
+                st.session_state.history = sorted(status["history"], key=lambda x: x["q_no"])
+            else:
+                st.session_state.history = []
+
+    # Eğer Kullanıcı Bir Soruya Tıkladıysa Gösterilecek Alan
+    if "review_item" in st.session_state:
+        rev = st.session_state.review_item
+        st.markdown(f"#### Soru {rev['q_no']} Detayı")
+        
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            st.image(GITHUB_BASE + rev['img'], use_container_width=True)
+        with c2:
+            if rev['correct']:
+                st.success(f"✅ Sizin Yanıtınız: {CLASS_LABELS.get(rev['choice'], rev['choice'])} (DOĞRU)")
+            else:
+                st.error(f"❌ Sizin Yanıtınız: {CLASS_LABELS.get(rev['choice'], rev['choice'])}")
+                st.info(f"🎯 Gerçek Tanı: {CLASS_LABELS.get(rev['actual'], rev['actual'])}")
+            
+            if st.button("İncelemeyi Kapat ❌", use_container_width=True):
+                del st.session_state.review_item
+                st.rerun()
+        st.markdown("---")
+
+    # 150 Soruyu Izgara (Grid) Şeklinde Butonlara Dökme
+    if st.session_state.history:
+        cols_per_row = 10 
+        for i in range(0, len(st.session_state.history), cols_per_row):
+            cols = st.columns(cols_per_row)
+            for j in range(cols_per_row):
+                if i + j < len(st.session_state.history):
+                    item = st.session_state.history[i+j]
+                    btn_color = "🟢" if item['correct'] else "🔴"
+                    
+                    if cols[j].button(f"{btn_color} {item['q_no']}", key=f"rev_btn_{item['q_no']}"):
+                        st.session_state.review_item = item
+                        st.rerun()
+
     st.markdown("---")
     st.markdown("Değerli vaktinizi ayırdığınız ve bu bilimsel çalışmaya katkı sağladığınız için teşekkür ederiz.")
