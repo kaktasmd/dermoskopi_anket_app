@@ -347,7 +347,7 @@ if st.session_state.screen == "welcome":
                 if resume_from_code(url_code.upper()):
                     st.rerun()
                 else:
-                    st.error("URL'deki kod geçersiz veya bulunamadı. Lütfen yeni anket başlatın.")
+                    st.error("Kod geçersiz veya bulunamadı. Lütfen mevcut kodu ankete devam et butonuna tıklayarak manuel giriniz ya da yeni anket başlatınız.")
                     if "kod" in st.query_params:
                         del st.query_params["kod"]
     st.title(STUDY_TITLE)
