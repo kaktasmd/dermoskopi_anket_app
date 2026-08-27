@@ -304,7 +304,7 @@ def append_response(row):
         return False
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=3600)
 def load_manifest():
     r = requests.get(MANIFEST_URL, timeout=15)
     r.raise_for_status()
@@ -553,6 +553,12 @@ elif st.session_state.screen == "survey":
     st.progress((offset + idx) / total)
     st.caption(f"Soru {question_number} / {total} |  Kodunuz: **{st.session_state.participant_code}**")
     st.image(url, use_container_width=True)
+
+    if idx + 1 < remaining_total:
+        next_item = st.session_state.images[idx + 1]
+        next_key = build_key(next_item)
+        next_url = GITHUB_BASE + next_key
+        st.markdown(f'<link rel="prefetch" href="{next_url}">', unsafe_allow_html=True)
 
     is_proc = st.session_state.get("is_processing", False)
 
