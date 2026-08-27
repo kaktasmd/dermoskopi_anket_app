@@ -219,6 +219,41 @@ CLASS_LABELS = {
 # ─────────────────────────────────────────────────────────────────
 def build_key(item):
     return item["class"] + "/" + item["file"]
+    
+def resume_from_code(code):
+    """Kod ile oturumu sunucudan geri yükler. Başarılıysa True döner."""
+    status = check_participant_code(code)
+    if not (status and status.get("found")):
+        return False
+
+    default_scores = {k: {"correct": 0, "total": 0} for k in CLASS_LABELS.keys()}
+    hist = status.get("history") or []
+
+    st.session_state.participant_code = code
+    st.session_state.correct_count = status.get("correct_count", 0)
+    st.session_state.class_scores = status.get("class_scores", default_scores)
+    st.session_state.history = sorted(hist, key=lambda x: int(x.get("q_no", 0)))
+
+    if status.get("completed"):
+        st.session_state.total_questions = len(hist) if hist else 150
+        st.session_state.screen = "finished"
+        return True
+
+    manifest = load_manifest()
+    by_key = {build_key(it): it for it in manifest}
+    order_keys = json.loads(status.get("image_order") or "[]")
+    answered = set(status.get("answered_images", []))
+
+    remaining = [k for k in order_keys if k not in answered]
+    st.session_state.images = [by_key[k] for k in remaining if k in by_key]
+    st.session_state.total_questions = len(order_keys) if order_keys else len(manifest)
+    st.session_state.answered_offset = len(answered)
+    st.session_state.image_order_json = status.get("image_order") or "[]"
+    st.session_state.demographics = {"year": status.get("year"),
+                                     "university": status.get("university")}
+    st.session_state.idx = 0
+    st.session_state.screen = "survey"
+    return True
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -304,6 +339,17 @@ st.markdown(hide_menu_style, unsafe_allow_html=True)
 # 1. WELCOME EKRANI
 # ─────────────────────────────────────────────────────────────────
 if st.session_state.screen == "welcome":
+    # ── OTOMATİK KURTARMA: URL'de kod varsa oturumu geri yükle ──
+    if "participant_code" not in st.session_state:
+        url_code = st.query_params.get("kod")
+        if url_code:
+            with st.spinner("Oturumunuz geri yükleniyor, lütfen bekleyin..."):
+                if resume_from_code(url_code.upper()):
+                    st.rerun()
+                else:
+                    st.error("URL'deki kod geçersiz veya bulunamadı. Lütfen yeni anket başlatın.")
+                    if "kod" in st.query_params:
+                        del st.query_params["kod"]
     st.title(STUDY_TITLE)
 
     st.markdown(
@@ -373,6 +419,7 @@ elif st.session_state.screen == "resume_login":
                     status = check_participant_code(entered_code)
 
                     if status and status.get("found"):
+                        st.query_params["kod"] = entered_code
                         default_scores = {k: {"correct": 0, "total": 0} for k in CLASS_LABELS.keys()}
 
                         if status.get("completed"):
@@ -462,6 +509,8 @@ elif st.session_state.screen == "demographics":
                     st.session_state.correct_count = 0
                     st.session_state.history = []          # YENİ: boş geçmiş başlat
                     st.session_state.screen = "show_code"
+                    
+                    st.query_params["kod"] = generated_code
                     st.rerun()
 
 
