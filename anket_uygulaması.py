@@ -193,14 +193,14 @@ MANIFEST_URL = GITHUB_BASE + "manifest.json"
 
 APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOMXKfvKFRzPCcpCVIbSax63tllX00HX38MTviTrtSg2Si4c6kpwEGVnkspV72I0-MDQ/exec"
 
-AI_ACCURACY = 70.6
+AI_ACCURACY = 69.33
 
 AI_CLASS_SCORES = {
-    "NEVUS": 76.6,
-    "KERATOZ": 70.0,
-    "MELANOM": 76.6,
-    "NMSC": 90.0,
-    "DISPLASTIK_NEVUS": 40.0
+    "NEVUS": 76.67,
+    "KERATOZ": 73.33,
+    "MELANOM": 80.0,
+    "NMSC": 83.3,
+    "DISPLASTIK_NEVUS": 30.0
 }
 
 STUDY_TITLE = "Cilt Lezyonlarının Dermoskopik Görüntülerinin Değerlendirilmesi"
